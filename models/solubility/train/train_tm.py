@@ -92,7 +92,7 @@ m1 = GradientBoostingRegressor(**P_TM).fit(t[fx].values, t.mpC.values)
 out = {"model": export(m1, list(range(len(fx)))), "cv": res.get("tm_holdout_bigsol_solutes_degC"), "features": fx,
        "meta": {"name": "tm_model", "version": "0.1", "n": int(len(t)), "params": P_TM, "quick": bool(args.quick), "license": "CC BY 4.0（出典は ATTRIBUTION.md）",
                 "what": "融点 / °C の推算。入力は js/features.js の desc 41 個 ＋ 官能基の数 56 個（solute.x）。cv は溶解度の学習の溶質を外して測った外れ（°C）",
-                "source": "Jean-Claude Bradley Open Melting Point Dataset (Bradley, Williams, Lang), figshare, doi:10.6084/m9.figshare.1031637, CC0 1.0（出所の欄が非営利の薬のデータベースと試薬会社のカタログの行を除く）"}}
+                "source": "Jean-Claude Bradley Open Melting Point Dataset v2 (Jean-Claude Bradley, Antony Williams, Andrew Lang), figshare, doi:10.6084/m9.figshare.1031637, CC0 1.0（元の表の source の列が DrugBank・Aldrich Catalog-Handbook・Sigma-Aldrich の 1,707 行を除く）"}}
 json.dump(out, open(os.path.join(args.out, "tm_model.json"), "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
 # 照合の見本：溶解度の学習の溶質の行（融点そのものは書かない。入力と予測だけ）
 k = np.arange(len(t))[:: max(1, len(t) // 40)][:40]

@@ -1,30 +1,28 @@
-# 重みと表のライセンス（CC BY 4.0）
+# 重み・表のライセンス（CC BY 4.0）
 
-*English: all trained weights and data tables in `models/*/weights/` and `models/*/train/base_data/` (plus the reference values in `models/*/tests/`) are licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/ . When you share them (or weights you derived from them), keep the attribution in that model's `ATTRIBUTION.md`.*
+*English: we offer our licensable contributions to the trained weights, the data tables (`models/*/weights/`, `models/*/train/base_data/`) and the reference values in `models/*/tests/` under the Creative Commons Attribution 4.0 International License (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/legalcode . Upstream material keeps its original terms (Apache-2.0, CC BY 4.0, CC0-1.0); each model's `ATTRIBUTION.md` lists the sources, the changes and the notices. When you share the weights or tables (or anything derived from them), keep that attribution.*
 
-各モデルの `weights/` に入っている学習済みの重みと小さな表、`train/base_data/` に入っている学習の表（公開データを整えた物）、`tests/` の照合用の値は、**クリエイティブ・コモンズ 表示 4.0 国際（CC BY 4.0）** で配ります。
+## 何に、どのライセンスか
 
-学習の表のうち、元が Apache 2.0（HPLC の METLIN SMRT）や CC0（Zhang ら・AqSolDB・Bradley の融点など）のデータから来た部分は、元のライセンスでも使えます。どの行がどのデータから来たかは、表の出所の列やファイルの名前と、各モデルの `ATTRIBUTION.md` で分かります。
+- **こちらが許諾できる部分**（学習済みの重み、表の組み方・特徴量・こちらで作った表、照合用の値）は、「技術の秘密」から **クリエイティブ・コモンズ 表示 4.0 国際（CC BY 4.0）** で提供します。商用の利用、改変、製品への組み込み、再配布ができます。
+  - 要約：https://creativecommons.org/licenses/by/4.0/deed.ja
+  - 全文：https://creativecommons.org/licenses/by/4.0/legalcode.ja
+- **元のデータ**には、配布元の条件がそのまま及びます。HPLC の METLIN SMRT に由来する部分は Apache License 2.0（各モデルの `LICENSES/`）、CC BY の物は CC BY 4.0、CC0 の物は CC0 1.0 です。元の CC0 の部分や、権利の対象にならない事実に、こちらが新しい条件を付けることはありません。
+- **自社データの形の例**も、元のデータの条件のままです。HPLC の `train/examples/zhang_dataset10/` は Zhang らの CC0 のデータを整えた物、溶けるかの `train/examples/own_data_example.csv` は MixtureSolDB（CC BY 4.0）の測定と BigSolDB（CC BY 4.0）の密度から作った物です。
+- 同梱の RDKit.js（`vendor/rdkit/`）は、それぞれの部品のライセンスです（`vendor/rdkit/` の中の表示）。
 
-- ライセンスの要約：https://creativecommons.org/licenses/by/4.0/deed.ja
-- ライセンスの全文：https://creativecommons.org/licenses/by/4.0/legalcode.ja
+## 配る時にしてほしいこと
 
-## できること
-
-- 使う・写す・配る・改造する・製品に組み込む・売る。商用でも構いません。
-- 自分のデータを足して学習し直した重みを作る。その重みを社内だけで使うなら、公開の義務はありません。
-
-## 守ってほしいこと
-
-- 重みや表（そこから作った物を含む）を配る時は、そのモデルの `ATTRIBUTION.md` の出典の表示を一緒に付けてください。
-- 中身を変えた時は、変えたことが分かるようにしてください（例：「自社のデータを足して学習し直した」）。
+- 作者・指定された表示、提供された著作権・ライセンス・免責の表示、元の資料へのリンク、変更したことを、配り方に合った方法で伝えてください。各モデルの `ATTRIBUTION.md` を一緒に付けるのがいちばん簡単です。
+- 変えた時は、前の変更の表示を残し、新しい変更の要約を書いてください（例：「自社の測定値を足して学習し直した」）。**自社のデータそのものや、秘密の内容を明かす必要はありません。** 社内だけで使うなら、何も公開しなくて大丈夫です。
+- 元の作者・権利者や「技術の秘密」が、あなたの配布物を推奨していることを示すものではありません。
 
 ## なぜ CC BY なのか
 
-学習には、継承の義務がない公開データ（CC BY 4.0・CC0 1.0・Apache 2.0）だけを使いました。そのため、重みにも継承の義務を付けずに、CC BY 4.0 で配れます。会社で使う人、自社のデータで学習し直したモデルを製品に入れたい人も、気兼ねなく使えるようにするためです（リポジトリの [README.md](README.md) の「ライセンスと、そう決めた理由」）。
-
-元のデータのうち、Apache 2.0 のデータ（HPLC のモデルの METLIN SMRT）は、その全文を各モデルの `LICENSES/` に同梱しています。
+会社で使う人、自社のデータで学習し直したモデルを製品に入れたい人も、気兼ねなく使えるようにするためです。そのため、学習の行（保持値・溶解度などの値・構造・名前）には、継承の義務や非営利の条件があるデータを採用していません（リポジトリの [README.md](README.md) の「ライセンスと、そう決めた理由」）。
 
 ## 保証しないこと
 
-重みと表は「そのまま」の状態で提供します。予測の正しさ、特定の目的への適合は保証しません（CC BY 4.0 の第 5 条）。
+重み・表は「そのまま」の状態で提供します。予測の正しさ、特定の目的への適合は保証しません（CC BY 4.0 の第 5 条。元の資料にも、それぞれの条件の免責があります）。
+
+これは事実の整理で、法律の意見ではありません。

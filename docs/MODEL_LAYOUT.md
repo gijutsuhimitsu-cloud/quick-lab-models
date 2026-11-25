@@ -39,4 +39,5 @@ models/<モデルの名前>/
 
 - プログラム（`js/`・`train/`・`tests/`・`examples/`）：MIT（リポジトリの直下の `LICENSE`）
 - 重み・表（`weights/`）、学習の表（`train/base_data/`）、照合用の値（`tests/` の JSON）：CC BY 4.0（`LICENSE-DATA.md`）。中身の出典は各モデルの `ATTRIBUTION.md`
-- 同梱した第三者の物（RDKit.js など）：それぞれの元のライセンス（各モデルの `LICENSES/`）
+- 元のデータ：それぞれの元のライセンスのまま（Apache 2.0 のデータは、その全文を各モデルの `LICENSES/` に）
+- 同梱した第三者の物（RDKit.js と、その中の部品）：それぞれの元のライセンス（`vendor/rdkit/`）。新しい部品を同梱する時は、中に入っている部品のライセンスも確かめる

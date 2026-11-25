@@ -22,7 +22,7 @@
 | `weights/uncertainty_free.json` | 予測の幅の係数 | CC BY 4.0 |
 | `weights/columns.json` | カラム 551 本のパラメータ。`defaults` に C18・C8・フェニル・シアノ・極性基内包型の 5 本 | CC BY 4.0 |
 | `weights/stock_compounds.json` | ストックの化合物 102 種（名前・SMILES・特徴量の事前計算） | CC BY 4.0 |
-| `weights/name_index_free.json` | 化合物の名前 → SMILES の索引（773 件） | CC BY 4.0 |
+| `weights/name_index_free.json` | 化合物の名前 → SMILES の索引（759 件。別名には医薬品の商品名も含む。構造を探す手がかりで、製品との同一性は示さない） | CC BY 4.0 |
 | `examples/` | Node の例・ブラウザの最小のページ | MIT |
 | `tests/check.cjs` | JavaScript と学習側（Python）の予測の照合 | MIT |
 | `train/` | 学習し直す道具・自社データの足し方 | MIT |

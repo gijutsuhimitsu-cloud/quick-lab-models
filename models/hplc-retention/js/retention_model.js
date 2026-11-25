@@ -26,11 +26,12 @@
 //     var c = P.calibrate(compound, columnId, cond, { tR: 分 });      // 等組成なら { k: 保持係数 } でもよい。cond は測った時の条件
 //       戻り値 { ok, dlkw（実測 − 予測。lkw の単位）, lkwMeasured, lkwPredicted, ratio90（|dlkw| ÷ 90% の幅。1 を大きく超えたら入力の間違いを疑う）, reason（ok が false の時） }
 //       compound.cal に 1 件足される（何件でも足せる。予測の時は、当てる条件にいちばん近い 1 件を使う）。消すのは P.clearCalibration(compound)。
-//     そのあとの predictRetention は、lkw に w·dlkw を足す。w は 0〜0.87 で、測った条件と当てる条件が近いほど大きい
-//       （同じカラム・同じ有機溶媒・同じイオン化の状態で 0.87。カラムが別なら ×0.88、有機溶媒が別なら ×0.72、イオン化の状態が違えば ×0.68 まで下がる）。
+//     そのあとの predictRetention は、lkw に w·dlkw を足す。w は 0〜0.85 で、測った条件と当てる条件が近いほど大きい
+//       （同じカラム・同じ有機溶媒・同じイオン化の状態で 0.85。カラムが別なら ×0.89、有機溶媒が別なら ×0.73、イオン化の状態が違えば ×0.70 まで下がる）。
 //     戻り値に calibration: { w, dlkw, shift（実際に足した量）, lkwRaw（合わせ直す前の lkw）, point（使った測定の番号） } が付き、予測の幅は sqrt(1 − w²) 倍に狭くなる。
 //     cond.calibrate を false にすると、その 1 回だけ合わせ直しを使わない（比べたい時用）。
-//     係数は交差検証の予測で決めた（gpu/eval_calib.py、gpu/calib/）。
+//     係数は、公開の重みと同じ学習データ（継承のないデータだけ）での交差検証の予測から決めた（train/scripts/fit_calibration.py）。
+//     uncertainty の meta.calibration があれば、そちらを使う（自社データで学習し直して当て直した時用）。
 //
 // 保持の式（model.meta.par に定数 a, b, B。有機溶媒ごと）:
 //   u = phi / (1 + B·phi),  S = a + b·lkw,  log10 k = lkw − S·u
@@ -40,8 +41,8 @@
   var HSM = ['H', 'A', 'B', 'C', 'V', 'D'];
   var PHASES = ['C18', 'C8', 'Phenyl', 'CN', 'EP', 'F', 'short'];
   var ADDS = ['formic', 'acetic', 'tfa', 'ammonium', 'basic', 'phosphate'];
-  // 測定値 1 点での合わせ直しの係数（gpu/calib/rule.json と同じ値）
-  var CAL_DEFAULT = { w0: 0.87, col: 0.88, solv: 0.72, floor: 0.68, tau: 0.06 };
+  // 測定値 1 点での合わせ直しの係数（継承のないデータだけで当て直した値。train/scripts/fit_calibration.py の rounded）
+  var CAL_DEFAULT = { w0: 0.85, col: 0.89, solv: 0.73, floor: 0.70, tau: 0.02 };
 
   function evalTrees(model, x) {
     var s = model.baseline, trees = model.trees;

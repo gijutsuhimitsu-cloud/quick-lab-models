@@ -7,4 +7,4 @@
 - こちらで変えたこと：溶質の名前を「例-01」〜「例-11」に置き換えた（社内の番号に見立てた）。濃度（g/100 g 溶媒）を、純粋な溶媒の密度（BigSolDB 2.2）で mg/mL に換算し、一部の行は mol/L で書いた（単位の換算の例）。各行の `note` に、元の論文の DOI を残した。
 - 47 行が 20〜30 °C、3 行が 40 °C（温度の外で飛ばされる例）。融点の列は空（書けば使われる）。
 - 試し方：`node tests/check_own_data.cjs`、`node train/run_all.cjs --own train/examples/own_data_example.csv`。
-- このファイルのライセンスは CC BY 4.0（元のデータに従う）。
+- **このファイルはプログラムではなくデータで、MIT ではありません**。MixtureSolDB（CC BY 4.0）の測定と、BigSolDB 2.2（CC BY 4.0）の溶媒の密度から作った物なので、その条件（CC BY 4.0。出典の表示と変更の説明）がかかります。出典は [../../ATTRIBUTION.md](../../ATTRIBUTION.md) の 2。

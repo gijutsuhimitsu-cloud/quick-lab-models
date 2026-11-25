@@ -88,13 +88,13 @@ C.rdkit().then(R => {
   const examples = hits.slice(0, N_EXAMPLES).map((h, i) => Object.assign({}, h, { id: 'p' + i }));
   for (const e of examples) { const w = meas.get(e.smiles); if (w && w.water && !e.meas.water) e.meas.water = w.water; }
   C.writeJSON(path.join(P.OUT, 'example_compounds.json'), { meta: { name: 'example_compounds', version: '0.1', made: new Date().toISOString().slice(0, 10), license: 'CC BY 4.0（出典は ATTRIBUTION.md）',
-    note: '例の固体（BigSolDB 2.2 に 25 °C 付近の実測が多い物）。x は js/features.js の入力 97 個、abr は推算した Abraham 記述子、meas は溶媒 id → [log10(mol/L), 点の数, 出典の DOI]。name は日本語の名前（こちらで付けた）。TmC は融点 °C、tmSrc はその出所（sol = BigSolDB、mp = 融点の公開データ）。どれも学習に使った溶質なので、見込みは実測に近く出る' }, compounds: examples });
+    note: '例の固体（BigSolDB 2.2 に 25 °C 付近の実測が多い物）。x は js/features.js の入力 97 個、abr は推算した Abraham 記述子、meas は溶媒 id → [log10(mol/L), 点の数, 代表の出典の DOI 1 件（BigSolDB の点は平均した点の元の論文のうち先頭の 1 件で、全部は BigSolDB の Source の列にある。AqSolDB の水は AqSolDB の DOI）]。name は日本語の名前（こちらで付けた）。TmC は融点 °C、tmSrc はその出所（sol = BigSolDB、mp = 融点の公開データ）。どれも学習に使った溶質なので、見込みは実測に近く出る' }, compounds: examples });
   const look = {};
   for (const s of big) { const m = meas.get(s.can); if (m && Object.keys(m).length) look[s.can] = { t: s.TmC === null ? null : +s.TmC.toFixed(0), s: s.TmC === null ? null : s.tmSrc, m }; }
   for (const s of aqNew) look[s.can] = { t: s.TmC === null ? null : +s.TmC.toFixed(0), s: s.TmC === null ? null : s.tmSrc, m: meas.get(s.can) };
   C.writeJSON(path.join(P.OUT, 'lookup_25C.json'), { meta: { name: 'lookup_25C', version: '0.1', made: new Date().toISOString().slice(0, 10), license: 'CC BY 4.0（出典は ATTRIBUTION.md）' },
     source: 'BigSolDB 2.2, doi:10.5281/zenodo.22648301, CC BY 4.0（25 °C 付近の溶媒ごとの実測）／AqSolDB, doi:10.7910/DVN/OVHAW8, CC0 1.0（水。BigSolDB に水の値がない溶質だけ）',
-    T: '298.15 ± 5 K（AqSolDB は室温付近の値）', key: '正規化した SMILES（RDKit.js 2025.3.4、明示の水素を外した形）', value: 't = 融点 °C（なければ null）、s = 融点の出所（sol = BigSolDB、mp = 融点の公開データ doi:10.6084/m9.figshare.1031637、CC0 1.0）、m = 溶媒 id → [log10(mol/L), 点の数（AqSolDB は元の出所の数）, 出典の DOI]', solutes: look });
+    T: '298.15 ± 5 K（AqSolDB は室温付近の値）', key: '正規化した SMILES（RDKit.js 2025.3.4、明示の水素を外した形）', value: 't = 融点 °C（なければ null）、s = 融点の出所（sol = BigSolDB、mp = 融点の公開データ doi:10.6084/m9.figshare.1031637、CC0 1.0）、m = 溶媒 id → [log10(mol/L), 点の数（AqSolDB は元の出所の数）, 代表の出典の DOI 1 件（BigSolDB の点は平均した点の元の論文のうち先頭の 1 件で、全部は BigSolDB の Source の列にある。AqSolDB の水は AqSolDB の DOI）]', solutes: look });
   console.log('例の固体', examples.length, '（融点つき', examples.filter(e => e.TmC !== null).length, '）照合の表の溶質', Object.keys(look).length, 'AqSolDB で水を補った溶質', nAdd);
   console.log('書いた: ' + ['solvents.json', 'lookup_25C.json', 'example_compounds.json'].map(f => path.join(P.OUT, f)).join('、'));
 }).catch(e => { console.error(e); process.exit(1); });

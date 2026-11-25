@@ -104,7 +104,7 @@ python train\run.py
 | `wiczling_osf` | Kubik ほか, OSF doi:10.17605/OSF.IO/ZQTJ7・QBV7J・2MCNW・Y6S8P・EVUJ9（5 記録） | CC BY 4.0 | 各記録の zip を、記録の番号（`zqtj7` など）のフォルダに展開 |
 | `zhang2024_scidb` | Zhang ほか, Science Data Bank doi:10.57760/sciencedb.15823 | CC0 1.0 | `Dataset 01.xlsx` ほか 26 個（番号は `build_from_raw.py` の `ZHANG_COLUMN`）。Dataset 10 は評価専用（`examples/zhang_dataset10/`） |
 
-継承つき（CC BY-SA）のデータ（RepoRT など）、非営利限定のデータ、出所の分からないデータは、基礎データにも作り直しの手順にも入っていません。
+継承つき（CC BY-SA）のデータ（RepoRT など）の保持値・構造、非営利限定のデータ、出所の分からないデータは、基礎データにも作り直しの手順にも入っていません。例外は 1 つで、SMRT の測定条件（カラム・勾配・流量）は、論文に書かれた条件を RepoRT の記録 0186 の記載を経由して読んだ事実の値です（`base_data/README.md`）。
 
 ## ライセンス
 

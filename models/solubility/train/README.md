@@ -47,7 +47,7 @@ node train/run_all.cjs --own train/own_data/my_data.csv --install   # できた�
 - `base_data/tm_train.csv.gz`（融点のモデルの学習用の表：融点と構造の記述子 97 列、19,287 構造）
 - `weights/tm_lookup.json`（融点の照合の表。`build_tables.cjs` は、土台の表に融点がない溶質に、この表の値があれば足す）
 
-出所の欄が、利用条件が非営利の薬のデータベース、または試薬会社のカタログである行（1,707 行）は、元の表から読んでいません（行の番号は `rebuild/bradley_excluded_keys.txt`。外したい行が増えたら、ここに足して下の「元のデータから全部を作り直す」）。
+元の表の source の列が DrugBank（875 行）、Aldrich Catalog-Handbook（742 行）、Sigma-Aldrich（90 行）である計 1,707 行は、元の表から読んでいません。ほかの出所（PHYSPROP、Alfa Aesar などほかの試薬会社のカタログ、ハンドブック、ウェブの資料など）の行はそのまま使いました（行の番号は `rebuild/bradley_excluded_keys.txt`。外したい行が増えたら、ここに足して下の「元のデータから全部を作り直す」）。
 
 `node train/run_all.cjs` で、公開の重みと**木が 1 本残らず同じ**モデルができることを確かめました（2026-11-25、scikit-learn 1.9.0。版が違うと少し変わることがある）。
 

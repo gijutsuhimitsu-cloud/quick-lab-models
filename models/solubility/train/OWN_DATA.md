@@ -55,4 +55,4 @@ node tests/check_own_data.cjs                                                   
 node train/run_all.cjs --own train/examples/own_data_example.csv --quick         # 流れを確かめる（30 秒ほど）
 ```
 
-例のファイルは、公開データ（MixtureSolDB の純粋な溶媒の点、CC BY 4.0）のうち、学習の土台の表に入っていない溶質 11 種・50 行を、自社のデータに見立てて名前を「例-01」などに置き換えた物です（[examples/README.md](examples/README.md)）。40 °C の 3 行は、温度の外で飛ばされる例として残しています。
+例のファイルは、公開データ（MixtureSolDB の純粋な溶媒の点と BigSolDB 2.2 の溶媒の密度。どちらも CC BY 4.0）のうち、学習の土台の表に入っていない溶質 11 種・50 行を、自社のデータに見立てて名前を「例-01」などに置き換えた物です（[examples/README.md](examples/README.md)）。データなので MIT ではなく、元のデータの条件（CC BY 4.0）がかかります。40 °C の 3 行は、温度の外で飛ばされる例として残しています。

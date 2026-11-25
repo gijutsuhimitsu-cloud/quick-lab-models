@@ -105,7 +105,8 @@ S.estimateTm(c);                                                // 融点の推�
 ## 融点について
 
 - 融点は、溶解度の見込みにいちばん効く入力です。`prepare` はページと同じ順で融点を入れます：**入れた値 ＞ 溶解度の照合の表（BigSolDB の融点、なければ融点の公開データ）＞ 融点の照合の表（`weights/tm_lookup.json`）**。出所は `tmSrc`（`user`・`sol` = BigSolDB・`mp` = 融点の公開データ）。
-- `tm_lookup.json` は、融点の公開データ（Jean-Claude Bradley Open Melting Point Dataset、CC0 1.0）から作った約 1.9 万構造の融点（同じ構造は中央値）です。**出所の欄が、利用条件が非営利の薬のデータベース、または試薬会社のカタログである行（1,707 行）は外しています**。ほかの出所の行はそのまま使いました。行ごとの出所は元のデータの source の列にあります（[ATTRIBUTION.md](ATTRIBUTION.md)）。
+- `tm_lookup.json` は、融点の公開データ（Jean-Claude Bradley Open Melting Point Dataset v2、CC0 1.0）から作った 19,287 構造の融点（同じ構造は中央値）です。**元の表の source の列が DrugBank（875 行）、Aldrich Catalog-Handbook（742 行）、Sigma-Aldrich（90 行）である計 1,707 行は外しています**。ほかの出所（PHYSPROP、Alfa Aesar などほかの試薬会社のカタログ、ハンドブック、ウェブの資料など）の行はそのまま使いました。行ごとの出所は元の表の key・source・link の列にあります。
+- CC0 は、元のデータセットを登録した人が手放せる権利についての宣言で、元の資料（PHYSPROP、Alfa Aesar、ハンドブック、ウェブの資料など）の権利者が個別に許したことや、値を保証することを表すものではありません。出所や値の誤りに気づいたら、その構造と元の表の key を添えて知らせてください（[ATTRIBUTION.md](ATTRIBUTION.md) の 6）。
 - どちらの表にもない時は `TmC: null` で、融点なしのモデルを使います。`tmHint` に構造からの推算（5 °C 刻み、外れの約 7 割が ± 36 °C）を返しますが、計算には使いません（推算した融点を入れても幅は狭くならなかった）。
 - 学習の土台の表（`train/base_data/`）にも同じ融点が入っているので、学習し直す時に何も取りに行かなくても、公開の重みと同じ物ができます。
 
@@ -124,10 +125,10 @@ S.estimateTm(c);                                                // 融点の推�
 |---|---|---|
 | `js/solubility.js` | 入口（読み込み・見込み・換算・混合・希釈・判定） | MIT |
 | `js/solfeat.js`・`solub.js`・`abraham.js`・`features.js` | 木の計算と入力、式、Abraham の式、構造の記述子（HPLC のモデルと同じ features.js） | MIT |
-| `weights/` | 重みと小さな表（JSON。溶解度・融点の照合の表を含む） | CC BY 4.0（[ATTRIBUTION.md](ATTRIBUTION.md)） |
+| `weights/` | 重みと小さな表（JSON。溶解度・融点の照合の表を含む） | こちらの寄与は CC BY 4.0、元のデータの条件も残る（[ATTRIBUTION.md](ATTRIBUTION.md)、直下の LICENSE-DATA.md） |
 | `examples/` | Node の例、ブラウザの 1 枚 | MIT |
-| `tests/` | JS と学習側（scikit-learn）の照合、サイトのページの計算との照合、自社のデータの読み取り | MIT（照合用の値は CC BY 4.0） |
-| `train/` | 学習し直す道具・土台の表 | 道具は MIT、表は CC BY 4.0 |
+| `tests/` | JS と学習側（scikit-learn）の照合、サイトのページの計算との照合、自社のデータの読み取り | プログラムは MIT、照合用の値（`reference_*.json`）は重みと同じ扱い |
+| `train/` | 学習し直す道具・土台の表・例の CSV | 道具は MIT。土台の表・例の CSV（MixtureSolDB と BigSolDB の CC BY 4.0）・除外の key の一覧は MIT ではなく、データの条件（[train/base_data/README.md](train/base_data/README.md)） |
 
 確かめ方：`node tests/check.cjs`（すべて合格なら、JS の計算が学習側と合っている）、`node tests/check_own_data.cjs`。
 

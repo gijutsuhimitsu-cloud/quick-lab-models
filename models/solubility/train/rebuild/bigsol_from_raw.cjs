@@ -7,7 +7,7 @@
      溶質の記述子の表（<base>/abraham_solutes_clean.csv.gz）、記述子の推算式（<weights>/abraham_solute_model.json）、
      融点の照合の表（<weights>/tm_lookup.json。BigSolDB に融点がない溶質に使う。作り直しは train/rebuild/bradley_tm.cjs）
    使い方（models/solubility/ で）: node train/rebuild/bigsol_from_raw.cjs
-   出力: <out>/base_data/bigsol_25C.csv.gz（25 °C 付近の実測を溶質 × 溶媒ごとに平均した表）
+   出力: <out>/base_data/bigsol_25C.csv.gz（25 °C 付近の実測を溶質 × 溶媒ごとに平均した表。doi の列は、平均した点の元の論文の DOI を最大 3 件）
          <out>/base_data/bigsol_solutes.csv.gz（溶質ごとの M・log Pow・融点（tmSrc：sol = BigSolDB、mp = 融点の公開データ）・推算した記述子）
    溶質の名前は書かない（配布元の表の名前は写さない。構造で引く）。
          <out>/formula.json（式の 4 つの係数、融点が分からない時に置く値、外れ）、work/validation_bigsol.json

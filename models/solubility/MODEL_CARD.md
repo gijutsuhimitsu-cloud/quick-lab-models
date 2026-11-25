@@ -59,7 +59,7 @@
 | MixtureSolDB | 混合溶媒の補正の係数、主な溶媒の沸点 | CC BY 4.0 |
 | Abraham Solvent Master Dataset | 溶媒の係数 c・e・s・a・b・v | CC0 1.0 |
 | Compounds with known Abraham descriptors | 溶質の記述子の推算式の学習 | CC BY 4.0 |
-| Jean-Claude Bradley Open Melting Point Dataset | BigSolDB に融点がない溶質の融点（学習と、融点の照合の表 `tm_lookup.json`）、融点の推算モデル | CC0 1.0（出所の欄が非営利の薬のデータベースと試薬会社のカタログの 1,707 行は除いた） |
+| Jean-Claude Bradley Open Melting Point Dataset | BigSolDB に融点がない溶質の融点（学習と、融点の照合の表 `tm_lookup.json`）、融点の推算モデル | CC0 1.0（v2。元の表の source の列が DrugBank（875 行）、Aldrich Catalog-Handbook（742 行）、Sigma-Aldrich（90 行）である計 1,707 行を除いた。PHYSPROP・Alfa Aesar などほかの出所の行は使った） |
 
 作者・DOI・こちらで変えたことは [ATTRIBUTION.md](ATTRIBUTION.md)。
 

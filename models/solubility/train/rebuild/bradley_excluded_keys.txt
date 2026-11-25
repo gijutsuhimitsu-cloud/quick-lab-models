@@ -1,6 +1,7 @@
-# 融点の公開データ（doi:10.6084/m9.figshare.1031637）で、読まない行の key の列の値（1707 行）。
-# 出所（source の列）が、利用条件が非営利の薬のデータベース、または試薬会社のカタログである行。train/rebuild/bradley_tm.cjs が読む。
-# 外す行を増やす時は、ここに key を足す（1 行に 1 つ。# から後は読まない）。
+# 融点の公開データ（Jean-Claude Bradley Open Melting Point Dataset v2、doi:10.6084/m9.figshare.1031637、CC0 1.0）で、読まない行の key の列の値（1,707 行）。
+# 元の表の source の列が DrugBank（875 行）、Aldrich Catalog-Handbook（742 行）、Sigma-Aldrich（90 行）である行。
+# ほかの出所（PHYSPROP、Alfa Aesar などほかの試薬会社のカタログ、ハンドブック、ウェブの資料など）の行は外していない。
+# この一覧はこちらで選んだ物（元の表の key に対応する）。train/rebuild/bradley_tm.cjs が読む。外す行を増やす時は、ここに key を足す（1 行に 1 つ。# から後は読まない）。
 13101
 13104
 13106

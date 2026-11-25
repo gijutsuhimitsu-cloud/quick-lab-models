@@ -21,15 +21,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 --------------------------------------------------------------------------------
-This MIT license covers the program code in this repository (models/*/js,
-models/*/train except train/base_data, models/*/tests, models/*/examples).
-Trained weights and data tables (models/*/weights, models/*/train/base_data,
-reference values in models/*/tests) are licensed under CC BY 4.0
-(see LICENSE-DATA.md and each model's ATTRIBUTION.md).
-The bundled RDKit.js (vendor/rdkit) is under its own BSD 3-Clause license.
+The MIT License above applies to the project's own program code, including
+the browser and Node examples, training scripts and test programs. Data,
+trained weights, data tables, reference values, the example data files for
+retraining and the data-selection key lists have separate terms: see
+LICENSE-DATA.md and each model's ATTRIBUTION.md. The bundled RDKit.js and the
+third-party components inside it have their own licenses: see vendor/rdkit/.
 
-この MIT ライセンスが付くのは、このリポジトリのプログラム（models/*/js・train
-〈base_data を除く〉・tests・examples）です。学習済みの重みと表（models/*/weights・
-models/*/train/base_data・tests の照合用の値）は CC BY 4.0（LICENSE-DATA.md と、
-各モデルの ATTRIBUTION.md）。同梱の RDKit.js（vendor/rdkit）は、元の BSD 3-Clause
-ライセンスです。
+この MIT ライセンスは、このプロジェクトが許諾できるプログラム（ブラウザと Node の
+使い方の例、学習の道具、照合のプログラムを含む）に付きます。学習済みの重み、表、
+照合用の値、学習し直す時のデータの例、データを選ぶ時のキーの一覧は、LICENSE-DATA.md と
+各モデルの ATTRIBUTION.md の条件です。同梱の RDKit.js と、その中の第三者の部品には、
+vendor/rdkit/ の中のライセンスと表示が付きます。
