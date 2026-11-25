@@ -1,0 +1,10 @@
+# 自社のデータ・学習の途中の物はリポジトリに入れない
+**/train/own_data/*
+!**/train/own_data/README.md
+**/train/work/
+**/train/out/
+**/__pycache__/
+*.pkl
+*.pyc
+.DS_Store
+Thumbs.db

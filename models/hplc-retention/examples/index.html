@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HPLC 保持の見本</title>
+<style>
+  :root { --bg:#fbfaf7; --fg:#1d1d1b; --muted:#6b6a65; --line:#dcd9d0; --accent:#2f6f9f; --band:rgba(47,111,159,.16); }
+  @media (prefers-color-scheme: dark) { :root { --bg:#17181a; --fg:#ecebe6; --muted:#a3a29c; --line:#36383c; --accent:#7fb3dc; --band:rgba(127,179,220,.2); } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, "Hiragino Sans", "Yu Gothic UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.note { color: var(--muted); margin: 0 0 20px; font-size: 13px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 16px; }
+  label { display: block; font-size: 13px; color: var(--muted); }
+  select, input[type=text] { width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--fg); font: inherit; }
+  input[type=range] { width: 100%; }
+  .out { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .big { font-size: 22px; font-variant-numeric: tabular-nums; }
+  .bar { position: relative; height: 14px; border-radius: 7px; background: var(--line); margin: 8px 0 2px; overflow: hidden; }
+  .bar .b { position: absolute; top: 0; bottom: 0; background: var(--band); }
+  .bar .m { position: absolute; top: -2px; bottom: -2px; width: 3px; background: var(--accent); }
+  .axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .err { color: #b3402b; }
+</style>
+</head>
+<body>
+<main>
+  <h1>HPLC の保持の見本</h1>
+  <p class="note">このフォルダのモデル（CC BY 4.0 の重み）を読み込んで、保持時間の見込みを出す最小のページです。計算はすべてブラウザの中で行います。リポジトリの直下で <code>python -m http.server</code> を動かし、<code>/models/hplc-retention/examples/</code> を開いてください（ファイルを直接開くと、重みを読み込めません）。</p>
+
+  <div class="grid">
+    <div><label for="cmp">分子（ストックの 102 種）</label><select id="cmp"></select></div>
+    <div><label for="smi">または SMILES</label><input id="smi" type="text" placeholder="例：CCc1ccccc1"></div>
+    <div><label for="col">カラム</label><select id="col"></select></div>
+    <div><label for="org">有機溶媒</label><select id="org"><option value="acn">アセトニトリル</option><option value="meoh">メタノール</option></select></div>
+    <div><label for="phi">有機溶媒の割合 <span id="phiV"></span></label><input id="phi" type="range" min="10" max="90" step="1" value="50"></div>
+    <div><label for="ph">水側の pH <span id="phV"></span></label><input id="ph" type="range" min="2" max="10" step="0.1" value="3"></div>
+  </div>
+
+  <div class="out">
+    <div id="msg" class="note">読み込み中…</div>
+    <div class="big" id="res"></div>
+    <div class="bar"><div class="b" id="band"></div><div class="m" id="mark"></div></div>
+    <div class="axis"><span>0 分</span><span id="axMid">15 分</span><span id="axEnd">30 分</span></div>
+    <p class="note">カラムは 150 × 4.6 mm・5 µm、流量 1.0 mL/min、35 °C の等組成として計算しています。薄い帯は外れの約 7 割が入る幅（目安で、保証ではありません）。</p>
+  </div>
+</main>
+
+<script src="../../../vendor/rdkit/RDKit_minimal.js"></script>
+<script src="../js/features.js"></script>
+<script src="../js/retention_model.js"></script>
+<script>
+(async function () {
+  const $ = (id) => document.getElementById(id);
+  const get = (f) => fetch('../weights/' + f).then(r => { if (!r.ok) throw new Error(f); return r.json(); });
+  let P, stock, columns, RDKit = null, custom = null;
+  try {
+    const [model, unc, cols, st] = await Promise.all([get('model_free.json'), get('uncertainty_free.json'), get('columns.json'), get('stock_compounds.json')]);
+    columns = cols; stock = st.compounds;
+    P = ChromRetention.create(model, columns, unc);
+  } catch (e) {
+    $('msg').innerHTML = '<span class="err">重みを読み込めませんでした。ページをファイルとして直接開いていませんか？（上の説明のとおり、手元のサーバーから開いてください）</span>';
+    return;
+  }
+  stock.forEach((c, i) => $('cmp').add(new Option(c.name, i)));
+  $('cmp').value = String(Math.max(0, stock.findIndex(c => c.name === 'ibuprofen')));
+  columns.defaults.forEach(d => $('col').add(new Option(d.name, d.id)));
+  $('msg').textContent = '';
+
+  async function fromSmiles(s) {
+    if (!RDKit) RDKit = await initRDKitModule({ locateFile: () => '../../../vendor/rdkit/RDKit_minimal.wasm' });
+    const m = RDKit.get_mol(s);
+    if (!m || !m.is_valid()) { if (m) m.delete(); return null; }
+    m.remove_hs_in_place(); const f = ChromFeatures.compute(RDKit, m); m.delete();
+    return { desc: f.desc, groups: f.groups, ion: f.ion };
+  }
+
+  function update() {
+    const phi = +$('phi').value / 100, pH = +$('ph').value;
+    $('phiV').textContent = Math.round(phi * 100) + '%'; $('phV').textContent = pH.toFixed(1);
+    const c = custom || stock[+$('cmp').value];
+    const r = P.predictRetention(c, $('col').value, { organic: $('org').value, phi, pH, tempC: 35, length_mm: 150, id_mm: 4.6, particle_um: 5, flow: 1.0 });
+    const [lo, hi] = r.uncertainty.tR68;
+    $('res').textContent = 'tR ≈ ' + r.tR.toFixed(1) + ' 分（' + lo.toFixed(1) + '〜' + hi.toFixed(1) + ' 分）　k ≈ ' + r.k.toFixed(2);
+    const end = [30, 60, 120].find(v => hi <= v) || 120;      // 横軸の終わり（遅い時は 60・120 分に広げる）
+    $('axMid').textContent = (end / 2) + ' 分'; $('axEnd').textContent = end + ' 分' + (hi > 120 ? ' より先まで' : '');
+    const x = (t) => Math.min(100, Math.max(0, t / end * 100));
+    $('band').style.left = x(lo) + '%'; $('band').style.width = (x(hi) - x(lo)) + '%'; $('mark').style.left = 'calc(' + x(r.tR) + '% - 1px)';
+  }
+
+  ['cmp', 'col', 'org', 'phi', 'ph'].forEach(id => $(id).addEventListener('input', () => { if (id === 'cmp') { custom = null; $('smi').value = ''; } update(); }));
+  $('smi').addEventListener('change', async () => {
+    const s = $('smi').value.trim();
+    if (!s) { custom = null; $('msg').textContent = ''; update(); return; }
+    $('msg').textContent = '構造を読んでいます…';
+    const c = await fromSmiles(s);
+    if (!c) { custom = null; update(); $('msg').innerHTML = '<span class="err">この SMILES は読めませんでした。上の一覧の分子で計算しています。</span>'; return; }
+    custom = c; $('msg').textContent = 'SMILES の分子で計算しています。'; update();
+  });
+  update();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+{
+ "meta": {
+  "name": "formula",
+  "version": "0.1",
+  "made": "2026-11-25",
+  "license": "CC BY 4.0（出典は ATTRIBUTION.md）"
+ },
+ "source": "BigSolDB 2.2 (Krasnov et al.), Zenodo, doi:10.5281/zenodo.22648301, CC BY 4.0. 298.15 ± 5 K の実測を溶質 × 溶媒ごとに平均した 8416 点（有機溶媒・融点つき）。水は合わせ直さず、一般溶解度式のまま",
+ "equation": "log10 S = k0 + kP*(-logPow) + kC*crystal + kT*transfer ; 実測 1 点で合わせる時は log S_b = log S_a + beta*(transfer_b - transfer_a)",
+ "T_C": 25,
+ "K": {
+  "k0": 0.448,
+  "kP": 0.3462,
+  "kC": 0.917,
+  "kT": 0.2791
+ },
+ "beta": 1,
+ "beta_least_squares": 0.5332,
+ "tm_default_C": 150,
+ "cv": {
+  "organic_with_Tm": {
+   "n": 8416,
+   "bias": 0,
+   "mae": 0.664,
+   "rmse": 0.865,
+   "p50": 0.539,
+   "p68": 0.791,
+   "p90": 1.364
+  },
+  "organic_without_Tm": {
+   "n": 10851,
+   "bias": 0.176,
+   "mae": 0.836,
+   "rmse": 1.083,
+   "p50": 0.675,
+   "p68": 1.011,
+   "p90": 1.763
+  },
+  "water_with_Tm": {
+   "n": 433,
+   "bias": -0.153,
+   "mae": 0.94,
+   "rmse": 1.289,
+   "p50": 0.682,
+   "p68": 1.103,
+   "p90": 1.991
+  },
+  "water_without_Tm": {
+   "n": 637,
+   "bias": 0.152,
+   "mae": 1.144,
+   "rmse": 1.525,
+   "p50": 0.872,
+   "p68": 1.323,
+   "p90": 2.578
+  },
+  "one_point_organic_from_organic": {
+   "n": 106356,
+   "bias": -0.039,
+   "mae": 0.489,
+   "rmse": 0.789,
+   "p50": 0.291,
+   "p68": 0.508,
+   "p90": 1.135
+  },
+  "one_point_organic_from_water": {
+   "n": 4393,
+   "bias": -0.015,
+   "mae": 1.033,
+   "rmse": 1.417,
+   "p50": 0.747,
+   "p68": 1.21,
+   "p90": 2.329
+  },
+  "one_point_beta_least_squares": {
+   "n": 106356,
+   "bias": -0.01,
+   "mae": 0.473,
+   "rmse": 0.683,
+   "p50": 0.32,
+   "p68": 0.535,
+   "p90": 1.079
+  }
+ },
+ "band": {
+  "organic_with_Tm": 0.791,
+  "organic_without_Tm": 1.011,
+  "water_with_Tm": 1.103,
+  "water_without_Tm": 1.323,
+  "one_point": 0.508,
+  "one_point_from_water": 1.21
+ }
+}

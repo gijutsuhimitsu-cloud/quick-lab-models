@@ -1,0 +1,77 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT -->
+<!-- いちばん短い使い方（ブラウザ）。重みの JSON を fetch で読むので、リポジトリの直下で簡単なサーバーを立てて開く：
+       python -m http.server 8000   →   http://localhost:8000/models/solubility/examples/browser.html
+     計算はこのブラウザの中だけで行い、入れた構造はどこにも送らない。 -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>溶解度の見込み（例）</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 16px; max-width: 760px; color: #222; background: #fff; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border-bottom: 1px solid #ddd; padding: 4px 6px; text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+  .yes { color: #11713a; } .edge { color: #9a6700; } .no { color: #b3261e; }
+  input, select, button { font-size: 14px; }
+  #msg { color: #555; min-height: 1.4em; }
+</style>
+</head>
+<body>
+<h1>溶解度の見込み（25 °C）</h1>
+<p>
+  <label>固体 <select id="comp"></select></label>
+  <label>目標 <input id="target" type="number" value="10" min="0" step="any" style="width:6em"> mg/mL</label>
+</p>
+<p>
+  <label>自分の分子（SMILES） <input id="smi" placeholder="CC(=O)Nc1ccc(O)cc1" style="width:16em"></label>
+  <button id="add">足す</button>
+</p>
+<p id="msg"></p>
+<table>
+  <thead><tr><th>溶媒</th><th>見込み mg/mL</th><th>幅（約 7 割）</th><th>実測</th><th>判定</th></tr></thead>
+  <tbody id="rows"></tbody>
+</table>
+<p style="font-size:12px;color:#555">学習に使ったデータ：BigSolDB 2.2（CC BY 4.0）、AqSolDB（CC0 1.0）、MixtureSolDB（CC BY 4.0）ほか。出典は ATTRIBUTION.md。</p>
+
+<script src="../js/features.js"></script>
+<script src="../js/abraham.js"></script>
+<script src="../js/solub.js"></script>
+<script src="../js/solfeat.js"></script>
+<script src="../js/solubility.js"></script>
+<script>
+(async function () {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const fmt = v => v >= 100 ? v.toFixed(0) : v >= 1 ? v.toFixed(2) : v.toExponential(1);
+  const JA = { yes: "溶ける見込み", edge: "境目", no: "溶けない見込み" };
+  const S = await SolubilityModel.load("../weights/");
+  const comps = S.examples.map(e => S.fromExample(e.id));
+  function fill() { $("comp").innerHTML = comps.map((c, i) => '<option value="' + i + '">' + c.name + "</option>").join(""); }
+  function render() {
+    const c = comps[+$("comp").value], target = parseFloat($("target").value);
+    $("rows").innerHTML = S.estimateAll(c, { target }).map(e => {
+      const sv = S.solvent(e.solvent);
+      return "<tr><td>" + (sv.ja || sv.name) + "</td><td>" + fmt(e.mgPerML) + "</td><td>" + fmt(e.range[0]) + "〜" + fmt(e.range[1]) +
+        "</td><td>" + (e.measured ? fmt(e.measured.mgPerML) : "—") + '</td><td class="' + (e.verdict || "") + '">' + (JA[e.verdict] || "") + "</td></tr>";
+    }).join("");
+    $("msg").textContent = c.name + "：融点 " + (c.TmC === null ? "不明（入れると幅が狭くなる）" : c.TmC + " °C");
+  }
+  // RDKit.js（wasm 6.9 MB）は、分子を足す時だけ読む
+  let rdkit = null;
+  const getRDKit = () => rdkit || (rdkit = new Promise((ok, ng) => { const s = document.createElement("script"); s.src = "../../../vendor/rdkit/RDKit_minimal.js"; s.onload = ok; s.onerror = ng; document.head.appendChild(s); })
+    .then(() => window.initRDKitModule({ locateFile: () => "../../../vendor/rdkit/RDKit_minimal.wasm" })));
+  $("add").addEventListener("click", async () => {
+    try {
+      $("msg").textContent = "読み込み中";
+      const c = S.prepare(await getRDKit(), $("smi").value);
+      comps.push(c); fill(); $("comp").value = comps.length - 1; render();
+    } catch (e) { $("msg").textContent = "足せなかった：" + e.message; }
+  });
+  $("comp").addEventListener("change", render); $("target").addEventListener("input", render);
+  fill(); render();
+})().catch(e => { document.getElementById("msg").textContent = "読み込めなかった（サーバーから開いているか確かめる）：" + e.message; });
+</script>
+</body>
+</html>

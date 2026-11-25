@@ -1,0 +1,4 @@
+# 圧縮したデータ・バイナリは改行を変えない
+*.gz binary
+*.wasm binary
+*.npy binary

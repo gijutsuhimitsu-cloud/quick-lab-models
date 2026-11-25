@@ -1,0 +1,2 @@
+method_id,column,organic,phi,gradient,t0_min,dwell_min,pH,temp_C,length_mm,id_mm,particle_um,flow_mL_min,additive,note
+example_zhang10,hsm2_93,meoh,,0:0.1;2:0.1;24:1;27:1,1.35,,3.7,30.0,100.0,2.1,2.2,0.2,formic+ammonium,例：Zhang ほか（Science Data Bank doi:10.57760/sciencedb.15823、CC0 1.0）の Dataset 10 を、自社のデータの形に書き直した物。本当の自社のデータではない。公開の学習データには入っていない（評価専用のファイル）。pH は添加剤からの見積もり。移動相 A の有機溶媒（10%）は勾配の表に入れてある

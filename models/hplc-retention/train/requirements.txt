@@ -1,0 +1,7 @@
+# 学習の道具（CPU）に要る Python のパッケージ。公開の重みは、括弧の版で作った（ほかの版では、木がわずかに変わることがある）
+numpy>=2.0          # 2.4.6
+pandas>=2.0         # 3.0.3
+scipy>=1.11         # 1.18.0
+scikit-learn>=1.5   # 1.9.0
+openpyxl>=3.1       # 元のデータから作り直す時（scripts/build_from_raw.py）だけ
+# GPU のグラフのモデル（任意。gpu/README.md）: torch（CUDA 版）。RDKit の Python 版は要らない（グラフは Node の RDKit.js で作る）

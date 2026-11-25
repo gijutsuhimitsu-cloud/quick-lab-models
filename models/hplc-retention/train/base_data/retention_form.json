@@ -1,0 +1,86 @@
+{
+ "acn": {
+  "a": 3.1063286031957795,
+  "b": 1.8546193479179065,
+  "B": 1.3715569000959165,
+  "note": "Weber らの等組成の実測に当てはめた値（採用）。勾配時間の変化の検査では誤差が大きい（gradient_time_check）"
+ },
+ "meoh": {
+  "a": 3.4096119348588214,
+  "b": 1.9684219914436367,
+  "B": 1.202037245508832,
+  "note": "Wiczling グループのデータ（メタノール、勾配時間 30 分 → 90・270 分の予測）で決めた。scripts/fit_meoh.py"
+ },
+ "fit": {
+  "data": "Weber 2020 (doi:10.17632/x292z4gd25), C18 column, ACN / 10 mM H3PO4, 25-75 C",
+  "n_points": 5996,
+  "n_compounds": 105,
+  "rmse_logk": 0.10344640349355524,
+  "mae_logk": 0.07604225302522978,
+  "rmse_logk_same_form_B0": 0.12804900649508558
+ },
+ "gradient_time_check": {
+  "data": "Wiczling group, OSF (doi:10.17605/OSF.IO/ZQTJ7 ほか 4 件), 5 columns, pH 2.5-10.5, 25/35 C",
+  "what": "勾配時間 30 分の保持時間から lkw を逆算し、90 分・270 分の保持時間を予測したときの相対誤差の中央値",
+  "meoh_fitted": {
+   "median_rel_error": 0.02776640011303602,
+   "n": 22569
+  },
+  "meoh_with_acn_constants": {
+   "median_rel_error": 0.047320272211462094,
+   "n": 22569
+  },
+  "acn_weber_constants": {
+   "median_rel_error": 0.12524491285450307,
+   "n": 22314
+  },
+  "fitted_on": {
+   "columns": [
+    "C18 No.303",
+    "C8 No.484"
+   ],
+   "pH": [
+    2.5,
+    5.8,
+    9.7
+   ]
+  },
+  "acn_joint_constants": {
+   "median_rel_error": 0.040786334447438455,
+   "n": 22314
+  }
+ },
+ "acn_isocratic_only": {
+  "a": 3.1063286031957795,
+  "b": 1.8546193479179065,
+  "B": 1.3715569000959165,
+  "iso_rmse_logk": 0.10344640349355524,
+  "gradient_time_median_rel_error": 0.12524491285450307
+ },
+ "acn_joint_fit": {
+  "iso_rmse_logk": 0.16529905431326664,
+  "gradient_time_median_rel_error": 0.040786334447438455,
+  "gradient_only_optimum": {
+   "a": 9.907914316637509,
+   "b": 6.531206002104058,
+   "B": 5.972030560684666,
+   "iso_rmse": 0.36040210075583934,
+   "grad": 0.03394018700102951
+  }
+ },
+ "acn_joint_candidate": {
+  "a": 5.543306394180494,
+  "b": 6.560176480536816,
+  "B": 5.9265042847359215,
+  "iso_rmse_logk": 0.16529905431326664,
+  "gradient_time_median_rel_error": 0.040786334447438455,
+  "gradient_only_optimum": {
+   "a": 9.907914316637509,
+   "b": 6.531206002104058,
+   "B": 5.972030560684666,
+   "iso_rmse": 0.36040210075583934,
+   "grad": 0.03394018700102951
+  },
+  "note": "等組成と勾配時間の変化の両方に合わせた候補。b/(1+B) が制約の上限に張り付いたので採用していない"
+ }
+}

@@ -1,0 +1,7 @@
+# 元のデータ（大きい・取り直せる）、途中の物、できた重み、自社のデータはリポジトリに入れない
+raw/*
+!raw/README.md
+work/
+out/
+own_data/*
+!own_data/README.md
