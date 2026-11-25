@@ -13,7 +13,9 @@
 const fs = require('fs'), path = require('path');
 const HERE = path.join(__dirname, '..');
 const DIR = process.argv[2] ? path.resolve(process.argv[2]) : null;
-const W = DIR || path.join(HERE, 'weights'), REF = DIR || __dirname;
+// 照合の値：フォルダを渡せばそこ。渡さなければ tests/own/（自社のデータだけで学習して --install した時。git に入らない）か tests/
+const OWNREF = path.join(__dirname, 'own');
+const W = DIR || path.join(HERE, 'weights'), REF = DIR || (fs.existsSync(path.join(OWNREF, 'reference_gbt.json')) ? OWNREF : __dirname);
 const SM = require(path.join(HERE, 'js', 'solubility.js'));
 const SF = require(path.join(HERE, 'js', 'solfeat.js'));
 const FE = require(path.join(HERE, 'js', 'features.js'));
@@ -33,14 +35,17 @@ const report = (name, v, lim, n) => { const pass = v < lim; if (!pass) ok = fals
     abraham: read(wfile('abraham_solute_model.json')), tm: has(wfile('tm_model.json')) ? read(wfile('tm_model.json')) : null, examples: read(wfile('example_compounds.json')),
     lookup: has(wfile('lookup_25C.json')) ? read(wfile('lookup_25C.json')) : null, tmLookup: has(wfile('tm_lookup.json')) ? read(wfile('tm_lookup.json')) : null });
   const G = read(wfile('solubility_gbt.json')), formula = read(wfile('formula.json')), ABM = read(wfile('abraham_solute_model.json'));
-  console.log('重み ' + W + '（版 ' + (G.meta && G.meta.version) + '）');
+  console.log('重み ' + W + '（版 ' + (G.meta && G.meta.version) + '）　照合の値 ' + REF);
 
   // 1. 木の計算
   const rg = path.join(REF, 'reference_gbt.json');
+  if (DIR && !has(path.join(DIR, 'solubility_gbt.json'))) { console.log('不合格  ' + DIR + ' に solubility_gbt.json がない（学習し直した重みが無いまま、公開の重みで照合してしまうため止める）'); ok = false; }
   if (!has(rg)) { console.log('reference_gbt.json がない'); ok = false; }
   const ref = has(rg) ? read(rg) : { models: {} };
+  if (!Object.keys(ref.models).length) { console.log('不合格  照合の値にモデルが 1 つもない'); ok = false; }
   for (const key of Object.keys(ref.models)) {
     const r = ref.models[key]; let d = 0;
+    if (!G[key] || !(r.rows && r.rows.length) || !(r.pred && r.pred.length === r.rows.length)) { console.log('不合格  ' + key + '：重みにこのモデルがない、または照合の行が空・数が合わない'); ok = false; continue; }
     r.rows.forEach((row, i) => { d = Math.max(d, Math.abs(SF.evalModel(G[key], row) - r.pred[i])); });
     report('木の計算 ' + key.padEnd(6), d, 1e-4, r.rows.length);
   }
@@ -55,7 +60,7 @@ const report = (name, v, lim, n) => { const pass = v < lim; if (!pass) ok = fals
   const R = await initRDKitModule();
   const SV = new Map(S.solvents.map(s => [s.name, s]));
   for (const key of Object.keys(ref.models)) {
-    const r = ref.models[key]; if (!r.can) continue;
+    const r = ref.models[key]; if (!r.can || !G[key]) continue;
     let dx = 0, dy = 0, n = 0, nBig = 0;
     r.can.forEach((can, i) => {
       const sv = SV.get(r.solvent[i]); if (!sv) return;

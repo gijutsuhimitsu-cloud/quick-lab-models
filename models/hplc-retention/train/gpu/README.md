@@ -10,7 +10,7 @@
 
 ## 必要な物
 
-- CUDA の GPU（元の作業では NVIDIA L4、24 GB）と PyTorch（CUDA 版）。numpy。
+- CUDA の GPU（元の作業では NVIDIA L4、24 GB）と PyTorch 1.13 以上（CUDA 版。途中の `best.pt` を `weights_only=True` で、重みだけとして読むため）。numpy。
 - Python の RDKit は要りません。グラフは手元の PC で、ブラウザと同じコード（`js/graph_features.js` ＋ 同梱の RDKit.js）で作ります。
 - 先に、同じ名前で `python train/run.py` を済ませておく（分析法ごとの補正・予測の幅の 4 分割・木の重みを使います）。
 

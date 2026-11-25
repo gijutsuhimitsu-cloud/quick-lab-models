@@ -11,12 +11,12 @@ set -e
 cd "$(dirname "$0")"
 PY="${PYTHON:-python3}"
 G="${GROUP:-free}"; D="${DATA:-gpu_data}"; O="${RUNS:-runs}"
-C="--data $D --group $G --model gnn --graphs graphs_js.npz --select last"
+C=(--data "$D" --group "$G" --model gnn --graphs graphs_js.npz --select last)   # 配列にして、空白を含むパスでも分かれないように
 mkdir -p "$O/teach"
 for s in 0 1; do
-  [ -f "$O/teach_s$s/result.json" ] || $PY train_teacher.py $C --all 1 --seed $s --epochs 40 --out "$O/teach_s$s"
+  [ -f "$O/teach_s$s/result.json" ] || "$PY" train_teacher.py "${C[@]}" --all 1 --seed $s --epochs 40 --out "$O/teach_s$s"
 done
-$PY train_teacher.py $C --all 1 --aug "$D/aug.npz" --predict "$O/teach_s0,$O/teach_s1" --out "$O/teach"
-$PY train_teacher.py $C --all 1 --seed 0 --hid 128 --layers 4 --head 256 --epochs 30 --aug "$D/aug.npz" --aug_y "$O/teach/aug_pred.npy" \
+"$PY" train_teacher.py "${C[@]}" --all 1 --aug "$D/aug.npz" --predict "$O/teach_s0,$O/teach_s1" --out "$O/teach"
+"$PY" train_teacher.py "${C[@]}" --all 1 --seed 0 --hid 128 --layers 4 --head 256 --epochs 30 --aug "$D/aug.npz" --aug_y "$O/teach/aug_pred.npy" \
   --aug_n 250000 --aug_w 0.5 --export 1 --out "$O/final"
 date > "$O/DONE_final"

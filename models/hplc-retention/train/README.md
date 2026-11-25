@@ -73,6 +73,7 @@ python train\run.py
 
 1. 照合が合格していることを確かめる（`run.py` の最後に出る。あとからなら `node tests/check.cjs train/out/<名前>/weights`）。
 2. `train/out/<名前>/weights/` の 5 つのファイル（`model_free.json`・`uncertainty_free.json`・`stock_compounds.json`・`name_index_free.json`・`columns.json`）を、ページが読む場所（このリポジトリなら `weights/`）に写す。照合用の `reference_*.json` は `tests/` 用。
+   - **自社のデータを足した時は注意**：`name_index_free.json` には自社の化合物の名前と構造（出所の印 `own`）が、`reference_*.json` には自社の行の特徴量が入ることがあります。社内のフォルダに置くのはかまいませんが、公開のリポジトリ（GitHub のフォークなど）や社外に渡す物には入れないでください。名前の索引は、公開の物（このリポジトリの `weights/name_index_free.json`）のままでも動きます。
 3. ページの側の呼び方は変わりません（`ChromRetention.create(model, columns, uncertainty)`）。`meta.name` が違っても、重みと予測の幅とストックの印の名前がそろっていれば動きます。
 
 **公開の重みとして配るのは、基礎データだけで作った物です。** 自社のデータを足した重みは、下の「ライセンス」を見てください。

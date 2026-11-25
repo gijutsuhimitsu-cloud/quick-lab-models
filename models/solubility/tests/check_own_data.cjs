@@ -12,10 +12,13 @@ let ok = true; const check = (name, cond, extra) => { if (!cond) ok = false; con
 
 C.rdkit().then(R => {
   const solvents = C.readJSON(path.join(HERE, 'weights', 'solvents.json')).solvents, model = C.readJSON(path.join(HERE, 'weights', 'abraham_solute_model.json'));
-  const own = OWN.readOwn([file], { R, solvents, model, nameToSmiles: new Map() });
+  // 名前で引ける表は、学習（train/build_tables.cjs）と同じ：例の固体の日本語の名前だけ
+  const nameToSmiles = new Map(C.readJSON(path.join(HERE, 'weights', 'example_compounds.json')).compounds.map(e => [e.name.toLowerCase(), e.smiles]));
+  const own = OWN.readOwn([file], { R, solvents, model, nameToSmiles });
   const raw = C.readTable(file).rows.filter(r => r.some(c => String(c).trim()));
   console.log('ファイル ' + file + '：' + raw.length + ' 行 → 溶質 × 溶媒 ' + own.rows.length + ' 組（溶質 ' + own.solutes.size + '）、読まなかった行 ' + own.skipped.length);
   own.skipped.forEach(s => console.log('  読まなかった  ' + path.basename(s.line) + '  ' + s.why));
+  check('学習に使える行が 1 つ以上ある', own.rows.length > 0, own.rows.length ? '' : '（どの行も読めなかった。上の理由を見て直す）');
   check('どの行も、読めたか理由つきで飛ばしたか', own.rows.reduce((a, r) => a + r.n, 0) + own.skipped.length === raw.length);
   check('値は log10 mol/L で -12〜2 の間', own.rows.every(r => r.logS > -12 && r.logS < 2));
   // 単位の換算：同じ量を mg/mL と mol/L で書いた 2 行は同じ値になる

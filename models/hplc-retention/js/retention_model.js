@@ -202,10 +202,36 @@
         !!(unc.meta.seen_stock && compound.inchikey && unc.meta.seen_stock.indexOf(String(compound.inchikey).slice(0, 14)) >= 0);
       return { s68: s68, s90: Math.max(s90, s68), seen: !!seen };
     }
+    // 割合は 0〜1（% ではない）。範囲の外や数でない値は、黙って計算せずに止める
+    function fraction(v, what) {
+      var x = +v;
+      if (!(x >= 0 && x <= 1)) throw new Error(what + ' は 0〜1 の割合で書く（50% なら 0.5）: ' + v);
+      return x;
+    }
+    function program(cond) {
+      if (!(cond.gradient && cond.gradient.length)) return [[0, cond.phi === undefined ? 0.5 : fraction(cond.phi, 'phi')]];
+      var prev = 0;
+      return cond.gradient.map(function (p, i) {
+        var t = +p[0];
+        if (!(t >= prev)) throw new Error('gradient の時間は 0 以上で、増える順に書く（' + (i + 1) + ' 点目）: ' + p[0]);
+        prev = t;
+        return [t, fraction(p[1], 'gradient の ' + (i + 1) + ' 点目の割合')];
+      });
+    }
+    // 寸法・流量・時間：書いてなければ既定の値。書いてあれば正の数（遅れ時間 dwell は 0 以上）
+    function positive(v, def, what, zeroOk) {
+      if (v === undefined || v === null || v === '') return def;
+      var x = +v;
+      if (!(isFinite(x) && (zeroOk ? x >= 0 : x > 0))) throw new Error(what + ' は' + (zeroOk ? ' 0 以上' : '正') + 'の数で書く: ' + v);
+      return x;
+    }
     function setup(cond) {
-      var L = cond.length_mm || 100, id = cond.id_mm || 2.1, dp = cond.particle_um || 2.7, flow = cond.flow || 0.3;
-      return { L: L, dp: dp, t0: cond.t0 || deadTime(L, id, flow), par: PAR[cond.organic === 'meoh' ? 'meoh' : 'acn'],
-        prog: cond.gradient && cond.gradient.length ? cond.gradient : [[0, cond.phi === undefined ? 0.5 : cond.phi]] };
+      if (cond.organic !== undefined && cond.organic !== 'acn' && cond.organic !== 'meoh') throw new Error("organic は 'acn' か 'meoh': " + cond.organic);
+      var L = positive(cond.length_mm, 100, 'length_mm'), id = positive(cond.id_mm, 2.1, 'id_mm'), dp = positive(cond.particle_um, 2.7, 'particle_um'),
+        flow = positive(cond.flow, 0.3, 'flow');
+      positive(cond.dwell, 0, 'dwell', true);
+      var t0 = positive(cond.t0, null, 't0');
+      return { L: L, dp: dp, t0: t0 !== null ? t0 : deadTime(L, id, flow), par: PAR[cond.organic === 'meoh' ? 'meoh' : 'acn'], prog: program(cond) };
     }
 
     // ---- 測定値 1 点での合わせ直し ----

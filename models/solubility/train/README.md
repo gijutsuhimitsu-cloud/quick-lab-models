@@ -36,7 +36,9 @@ node train/run_all.cjs --own train/own_data/my_data.csv --install   # できた�
 
 時間は 24 コアの Windows の計算機で測った値です。`train_gbt.py --jobs N` で並列の数を変えられます。
 
-- `--install` は、照合に合格した重み（`solubility_gbt.json`・`tm_model.json`・`mix_fit.json`）を `weights/` へ、照合用の値を `tests/` へ写します。元に戻すときは、git で `weights/` を戻してください。
+- `--install` は、その回の実行で作った重み（`solubility_gbt.json`・`tm_model.json`・`mix_fit.json`）を `weights/` へ、照合用の値を `tests/` へ写します（前の実行の残りは写しません）。元に戻すときは、git で `weights/` と `tests/` を戻してください。
+- 自社のデータだけで学習した時（`--own-mode only` など）は、照合用の値に自社の構造が入るので、`tests/` ではなく `tests/own/`（`.gitignore` でリポジトリに入らない）に写します。`node tests/check.cjs` は、`tests/own/` があればそちらを使います。
+- 自社のデータを足した重み（`weights/` に写した物）にも、自社のデータから学んだ値が入ります。公開のリポジトリ（GitHub のフォークなど）や社外に出す物には入れないでください。
 - 学習し直した重みの `meta.version` は、自社のデータを足すと `0.1+own` になります。
 
 ## 融点について

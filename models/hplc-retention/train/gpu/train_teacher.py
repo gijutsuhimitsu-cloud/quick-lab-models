@@ -61,7 +61,7 @@ if A.fold >= 0:
     test_c = fold == A.fold
 if A.all:
     tr = in_tr & ok
-    va = np.zeros(len(ci), bool); va[np.random.default_rng(1).choice(np.where(tr)[0], 8000, replace=False)] = True     # 経過を見るだけ（学習に入っている行）
+    va = np.zeros(len(ci), bool); va[np.random.default_rng(1).choice(np.where(tr)[0], min(8000, int(tr.sum())), replace=False)] = True     # 経過を見るだけ（学習に入っている行）
     test_c = np.zeros(len(ci), bool)
 if A.max_rows:
     ix = np.where(tr)[0]; keep = np.random.default_rng(0).choice(ix, min(A.max_rows, len(ix)), replace=False); tr = np.zeros(len(ci), bool); tr[keep] = True
@@ -243,7 +243,7 @@ if A.predict:
     # 教師の予測: 学習済みのモデルごとに、組の行を予測して平均とばらつきを書く
     ps = []
     for d in A.predict.split(","):
-        net.load_state_dict(torch.load(os.path.join(d, "best.pt"), map_location=dev))
+        net.load_state_dict(torch.load(os.path.join(d, "best.pt"), map_location=dev, weights_only=True))
         ps.append(predict(net, np.arange(n0, n0 + na)))
         print("predicted", d, float(ps[-1].mean()), flush=True)
     ps = np.array(ps)
@@ -253,6 +253,8 @@ if A.predict:
 tri, vai = np.where(tr)[0], np.where(va)[0]
 if A.aug_y:
     tri = np.concatenate([tri, n0 + np.where(aug_ok)[0]])
+if len(tri) < A.bs:
+    sys.exit("学習の行が %d 行で、バッチの大きさ（--bs %d）より少ない。--bs を小さくするか、行を増やす" % (len(tri), A.bs))
 steps = A.epochs * (len(tri) // A.bs)
 opt = torch.optim.AdamW(net.parameters(), lr=A.lr, weight_decay=1e-5)
 sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=A.lr, total_steps=steps, pct_start=0.05)
@@ -271,7 +273,7 @@ for ep in range(A.epochs):
         best = (v, ep); torch.save(net.state_dict(), os.path.join(A.out, "best.pt"))
     if ep % 2 == 0 or ep == A.epochs - 1 or A.aug_y:
         print("ep %d loss %.4f val_mae %.4f best %.4f@%d  %.0fs" % (ep, tot / nb, v, best[0], best[1], time.time() - t0), flush=True)
-net.load_state_dict(torch.load(os.path.join(A.out, "best.pt")))
+net.load_state_dict(torch.load(os.path.join(A.out, "best.pt"), weights_only=True))
 pred = predict(net, np.arange(n0))
 np.save(os.path.join(A.out, "pred.npy"), pred)
 te = in_tr & test_c & ok

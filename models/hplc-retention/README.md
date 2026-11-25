@@ -40,7 +40,7 @@ node examples/node_example.cjs "CCc1ccccc1"
 node tests/check.cjs
 ```
 
-ブラウザ：リポジトリの直下で `python -m http.server 8000` を動かし、http://localhost:8000/models/hplc-retention/examples/ を開きます。
+ブラウザ：リポジトリの直下で `python -m http.server 8000 --bind 127.0.0.1` を動かし、http://127.0.0.1:8000/models/hplc-retention/examples/ を開きます。
 
 ## 使い方
 
@@ -81,6 +81,8 @@ Node では `require('./js/retention_model.js')` のように読めます（`exa
 | `t0` | 死時間（分）。書けば寸法からの計算より優先 | 寸法と流量から（空隙率 0.65） |
 | `dwell` | 装置の遅れ時間（分） | 0 |
 | `additive` | 受け取るが、結果は変わらない（添加剤は pH を決める物として扱う） | — |
+
+`organic` が `'acn'`・`'meoh'` 以外の時、割合が 0〜1 の外の時（`50` のように % で書いた時も）、`gradient` の時間が戻る時は、計算せずにエラーを投げます。
 
 ### 戻り値
 

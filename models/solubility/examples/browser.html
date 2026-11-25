@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- SPDX-License-Identifier: MIT -->
 <!-- いちばん短い使い方（ブラウザ）。重みの JSON を fetch で読むので、リポジトリの直下で簡単なサーバーを立てて開く：
-       python -m http.server 8000   →   http://localhost:8000/models/solubility/examples/browser.html
+       python -m http.server 8000 --bind 127.0.0.1   →   http://127.0.0.1:8000/models/solubility/examples/browser.html
      計算はこのブラウザの中だけで行い、入れた構造はどこにも送らない。 -->
 <html lang="ja">
 <head>
@@ -48,7 +48,7 @@
   const JA = { yes: "溶ける見込み", edge: "境目", no: "溶けない見込み" };
   const S = await SolubilityModel.load("../weights/");
   const comps = S.examples.map(e => S.fromExample(e.id));
-  function fill() { $("comp").innerHTML = comps.map((c, i) => '<option value="' + i + '">' + c.name + "</option>").join(""); }
+  function fill() { $("comp").replaceChildren(...comps.map((c, i) => new Option(c.name, String(i)))); }   // 名前は文字として入れる（HTML として読まない）
   function render() {
     const c = comps[+$("comp").value], target = parseFloat($("target").value);
     $("rows").innerHTML = S.estimateAll(c, { target }).map(e => {

@@ -14,6 +14,9 @@ const UNITS = {
   'log10(mol/l)': v => v, 'logs': v => v, 'log10_mol/l': v => v,
 };
 const normUnit = u => String(u || '').trim().toLowerCase().replace(/\s+/g, '').replace('l-1', '/l').replace('ml-1', '/ml').replace('mg/ml', 'mg/ml');
+// セル全体が 1 つの数の時だけ数として読む（parseFloat のように「1,5」を 1、「10-20」を 10 と読まない）
+const num = s => { const t = String(s).trim(); return /^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/.test(t) ? Number(t) : NaN; };
+const BADNUM = '（「1,5」「10-20」「<0.1」のような書き方は使えない。小数点は . で、1 つの数を書く）';
 
 // 溶媒の指定（id・英語の名前・日本語の名前・SMILES）→ 溶媒の表の 1 件
 function solventResolver(R, solvents) {
@@ -58,14 +61,15 @@ function readOwn(files, ctx) {
       if (!smi && name) smi = nameToSmiles.get(name.toLowerCase()) || '';
       if (!smi) return skipped.push({ line, why: '名前「' + name + '」では引けない（引けるのは例の固体の日本語の名前だけ）。SMILES を書く' });
       const sv = svOf(get(iSv), get(iSvS)); if (!sv) return skipped.push({ line, why: '溶媒「' + (get(iSv) || get(iSvS)) + '」が溶媒の表（weights/solvents.json）にない' });
-      const T = parseFloat(get(iT)); if (!(T >= T_MIN && T <= T_MAX)) return skipped.push({ line, why: '温度 ' + get(iT) + ' °C は 20〜30 °C の外（このモデルは 25 °C だけ）' });
+      const T = num(get(iT)); if (isNaN(T)) return skipped.push({ line, why: '温度「' + get(iT) + '」が数として読めない' });
+      if (!(T >= T_MIN && T <= T_MAX)) return skipped.push({ line, why: '温度 ' + get(iT) + ' °C は 20〜30 °C の外（このモデルは 25 °C だけ）' });
       const key = smi; let s = solutes.get(key);
       if (!s) { s = soluteFromSmiles(R, model, smi); if (s.why) return skipped.push({ line, why: s.why }); solutes.set(key, s); }
       let logS;
-      if (iL >= 0 && get(iL) !== '') logS = parseFloat(get(iL));
-      else { const v = parseFloat(get(iV)), u = normUnit(get(iU)), fn = UNITS[u]; if (!fn) return skipped.push({ line, why: '単位「' + get(iU) + '」は読めない（mg/mL・g/L・mg/L・µg/mL・mol/L・mmol/L・log10(mol/L)）' }); if (!(v > 0) && !u.startsWith('log')) return skipped.push({ line, why: '値が正の数でない' }); logS = fn(v, s.M); }
+      if (iL >= 0 && get(iL) !== '') { logS = num(get(iL)); if (isNaN(logS)) return skipped.push({ line, why: 'logS「' + get(iL) + '」が数として読めない' + BADNUM }); }
+      else { const v = num(get(iV)), u = normUnit(get(iU)), fn = UNITS[u]; if (isNaN(v)) return skipped.push({ line, why: '値「' + get(iV) + '」が数として読めない' + BADNUM }); if (!fn) return skipped.push({ line, why: '単位「' + get(iU) + '」は読めない（mg/mL・g/L・mg/L・µg/mL・mol/L・mmol/L・log10(mol/L)）' }); if (!(v > 0) && !u.startsWith('log')) return skipped.push({ line, why: '値が正の数でない' }); logS = fn(v, s.M); }
       if (!isFinite(logS)) return skipped.push({ line, why: '値が読めない' });
-      const tm = parseFloat(get(iTm)); if (isFinite(tm)) { if (!tms.has(s.can)) tms.set(s.can, []); tms.get(s.can).push(tm); }
+      if (get(iTm) !== '') { const tm = num(get(iTm)); if (isNaN(tm)) return skipped.push({ line, why: '融点「' + get(iTm) + '」が数として読めない' + BADNUM }); if (!tms.has(s.can)) tms.set(s.can, []); tms.get(s.can).push(tm); }
       const k2 = s.can + '\t' + sv.name; if (!acc.has(k2)) acc.set(k2, { can: s.can, name: name || s.can, solvent: sv.name, solventId: sv.id, water: !!sv.water, L: [] });
       acc.get(k2).L.push(logS);
     });

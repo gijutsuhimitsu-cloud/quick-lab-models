@@ -32,10 +32,17 @@ else console.log('\n（融点のモデルは学習し直さない）');
 run(NODE, [path.join(P.TRAIN, 'fit_mix.cjs')]);
 run(NODE, [path.join(P.MODEL, 'tests', 'check.cjs'), P.OUT]);
 if (flags.has('--install')) {
-  const files = ['solubility_gbt.json', 'tm_model.json', 'mix_fit.json'].filter(f => fs.existsSync(path.join(P.OUT, f)));
+  // 今回の実行で書いた物だけを写す（前の実行の残り、たとえば --skip-tm の時の古い融点のモデルは写さない）
+  const fresh = f => { const p = path.join(P.OUT, f); return fs.existsSync(p) && fs.statSync(p).mtimeMs >= t0 - 2000; };
+  const files = ['solubility_gbt.json', 'tm_model.json', 'mix_fit.json'].filter(fresh);
   for (const f of files) fs.copyFileSync(path.join(P.OUT, f), path.join(P.WEIGHTS, f));
-  const refs = ['reference_gbt.json', 'reference_tm.json'].filter(f => fs.existsSync(path.join(P.OUT, f)));
-  for (const f of refs) fs.copyFileSync(path.join(P.OUT, f), path.join(P.MODEL, 'tests', f));
-  console.log('\nweights/ へ写した: ' + files.join('、') + '。tests/ へ写した: ' + refs.join('、') + '（tests/reference_api.json は公開の重みの値なので、入口の照合は飛ばされる）');
+  const refs = ['reference_gbt.json', 'reference_tm.json'].filter(fresh);
+  // 自社のデータだけで学習した時は、照合の値に自社の構造が入る。git に入らない tests/own/ に写す（tests/check.cjs は、あればそちらを使う）
+  const ownRef = refs.includes('reference_gbt.json') && JSON.parse(fs.readFileSync(path.join(P.OUT, 'reference_gbt.json'), 'utf8')).own_rows === true;
+  const refDir = path.join(P.MODEL, 'tests', ownRef ? 'own' : '');
+  if (ownRef) fs.mkdirSync(refDir, { recursive: true });
+  for (const f of refs) fs.copyFileSync(path.join(P.OUT, f), path.join(refDir, f));
+  console.log('\nweights/ へ写した: ' + files.join('、') + '。' + path.relative(P.MODEL, refDir) + '/ へ写した: ' + refs.join('、') + '（tests/reference_api.json は公開の重みの値なので、入口の照合は飛ばされる）');
+  if (ownRef) console.log('照合の値に自社の構造が入っているので、tests/own/（.gitignore でリポジトリに入らない）に置いた。weights/ の重みも自社のデータを含むので、公開のリポジトリには入れない。');
 }
 console.log('\n終わり（' + ((Date.now() - t0) / 1000).toFixed(0) + ' 秒）。できた重み: ' + P.OUT);

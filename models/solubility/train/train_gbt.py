@@ -83,11 +83,15 @@ def fit(Xa, ya, wa):
     return GradientBoostingRegressor(**PARAMS).fit(Xa, ya, sample_weight=weights_or_none(wa))
 
 
+OWN_IN_REF = [False]   # 照合の見本に自社の行を使ったか（reference_gbt.json の own_rows）
+
+
 def sample_rows(rows, src, tms, n=40):
     """照合の見本の行：公開データの行から等間隔に n 行。自社のデータの行と、融点が手元の融点の表から来た行（tms = mp）は入れない（自社のデータだけの時は自社の行）"""
     ok = (src[rows] != "own") & (tms[rows] != "mp")
-    if not ok.any():                  # 自社のデータだけで学習した時は、自社の行で照合する（照合の値は train/out に書くだけ）
+    if not ok.any():                  # 自社のデータだけで学習した時は、自社の行で照合する（照合の値に自社の構造が入る。run_all.cjs は tests/own/ へ写す）
         ok = tms[rows] != "mp"
+        OWN_IN_REF[0] = True
     if not ok.any():
         ok = np.ones(len(rows), bool)
     pub = rows[ok]
@@ -210,6 +214,7 @@ out["meta"] = {"name": "solubility_gbt", "version": version, "made": pd.Timestam
 if n_own:
     out["meta"]["n_own_rows"] = n_own
 json.dump(cv, open(os.path.join(args.out, "gbt_cv.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+ref["own_rows"] = bool(OWN_IN_REF[0])
 json.dump(ref, open(os.path.join(args.out, "reference_gbt.json"), "w", encoding="utf-8"), separators=(",", ":"))
 dst = os.path.join(args.out, "solubility_gbt.json")
 with open(dst, "w", encoding="utf-8") as f:

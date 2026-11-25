@@ -28,7 +28,7 @@
 <body>
 <main>
   <h1>HPLC の保持の見本</h1>
-  <p class="note">このフォルダのモデル（CC BY 4.0 の重み）を読み込んで、保持時間の見込みを出す最小のページです。計算はすべてブラウザの中で行います。リポジトリの直下で <code>python -m http.server</code> を動かし、<code>/models/hplc-retention/examples/</code> を開いてください（ファイルを直接開くと、重みを読み込めません）。</p>
+  <p class="note">このフォルダのモデル（CC BY 4.0 の重み）を読み込んで、保持時間の見込みを出す最小のページです。計算はすべてブラウザの中で行います。リポジトリの直下で <code>python -m http.server 8000 --bind 127.0.0.1</code> を動かし、<code>http://127.0.0.1:8000/models/hplc-retention/examples/</code> を開いてください（ファイルを直接開くと、重みを読み込めません）。</p>
 
   <div class="grid">
     <div><label for="cmp">分子（ストックの 102 種）</label><select id="cmp"></select></div>
@@ -90,12 +90,13 @@
     $('band').style.left = x(lo) + '%'; $('band').style.width = (x(hi) - x(lo)) + '%'; $('mark').style.left = 'calc(' + x(r.tR) + '% - 1px)';
   }
 
-  ['cmp', 'col', 'org', 'phi', 'ph'].forEach(id => $(id).addEventListener('input', () => { if (id === 'cmp') { custom = null; $('smi').value = ''; } update(); }));
+  ['cmp', 'col', 'org', 'phi', 'ph'].forEach(id => $(id).addEventListener('input', () => { if (id === 'cmp') { custom = null; $('smi').value = ''; $('msg').textContent = ''; } update(); }));
   $('smi').addEventListener('change', async () => {
     const s = $('smi').value.trim();
     if (!s) { custom = null; $('msg').textContent = ''; update(); return; }
     $('msg').textContent = '構造を読んでいます…';
     const c = await fromSmiles(s);
+    if ($('smi').value.trim() !== s) return;      // 読んでいる間に入力が変わった・一覧の分子に戻した時は、古い結果を使わない
     if (!c) { custom = null; update(); $('msg').innerHTML = '<span class="err">この SMILES は読めませんでした。上の一覧の分子で計算しています。</span>'; return; }
     custom = c; $('msg').textContent = 'SMILES の分子で計算しています。'; update();
   });

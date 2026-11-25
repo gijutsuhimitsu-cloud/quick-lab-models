@@ -32,6 +32,9 @@ if opt.own_only and not opt.own:
     ap.error("--own-only には --own が要る")
 opt.own = os.path.abspath(opt.own) if opt.own else ""
 opt.name = opt.name or ("own" if opt.own else "free")
+# 名前はフォルダ 1 つ分（train/work/<名前>・train/out/<名前> の外に出ないように）。別の場所に書く時は --out
+if not all(ch.isascii() and (ch.isalnum() or ch in "_-.") for ch in opt.name) or opt.name in (".", "..") or opt.name.startswith("."):
+    ap.error("--name は英数字と _ - . だけの 1 つの名前（区切りの / や \\ は使えない。別の場所に書く時は --out）: %s" % opt.name)
 opt.outdir = os.path.abspath(opt.out) if opt.out else os.path.join(C.OUT, opt.name)
 opt.weights_dir = os.path.join(opt.outdir, "weights")
 opt.workdir = os.path.join(C.WORK, opt.name)

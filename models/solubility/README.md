@@ -59,7 +59,7 @@ S.estimateTm(c);                                                // 融点の推�
 
 - 自分の分子を足す時だけ、RDKit.js（`vendor/rdkit/RDKit_minimal.js`・`.wasm`、6.9 MB）を読んでください（例：`examples/browser.html`）。
 - 重みの JSON は合わせて 3.8 MB（gzip で 0.9 MB）。照合の表 `lookup_25C.json`（1.5 MB）・`tm_lookup.json`（0.7 MB）と融点のモデル `tm_model.json` は、`load('weights/', { lookup: false, tmLookup: false, tm: false })` で読まないこともできます（その時は融点を引かない）。
-- `fetch` で読むので、ファイルを直に開くのではなく、簡単なサーバーから開きます（`python -m http.server` など）。
+- `fetch` で読むので、ファイルを直に開くのではなく、簡単なサーバーから開きます（リポジトリの直下で `python -m http.server 8000 --bind 127.0.0.1` を動かし、http://127.0.0.1:8000/models/solubility/examples/browser.html を開く。`--bind 127.0.0.1` で、この PC の外からは見えない）。
 
 ### 返す値の要点
 
@@ -72,6 +72,8 @@ S.estimateTm(c);                                                // 融点の推�
 | `model` | 使ったモデル（`tm`・`notm`＝有機溶媒、`tm_w`・`notm_w`＝水） |
 | `capped` | 見込みが純粋な溶質の濃度（密度 1.2 g/cm³ と置く）を超えたので、そこで切った |
 | `extrapolated` | 学習データにその溶媒の点がない（係数の表にだけある溶媒）。幅は当てにならない |
+| `measured` | 文献の実測（ある時だけ）。`mgPerML` はいつもモデルの見込みで、実測は ここに別に入る。混合溶媒（`mix`）と希釈（`dilution`）の端の値は、実測があれば実測を使う（`useMeasured: false` で止められる） |
+| `bandFallback` | 学習し直した重みで、その種類（水・有機溶媒）の検証の行が無かったので、幅は検証できた幅のうちいちばん広い物で代えた。幅は目安にもならない |
 | `parts` | 式の内訳（固体の項・水になじむ度合い・溶媒への移りやすさ・定数・実測に合わせた補正）。log S への寄与 |
 
 ## 精度（学習に使っていない固体で測った値）

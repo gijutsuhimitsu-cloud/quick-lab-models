@@ -67,6 +67,15 @@
     function pickModel(has, water) { return G[modelKey(has, water)]; }
     function cvOf(has) { return G.cv[has ? 'tm' : 'notm'] && G.cv[has ? 'tm' : 'notm'].organic ? G.cv[has ? 'tm' : 'notm'] : G.cv[has ? 'notm' : 'tm']; }
     function transfer(sv, sol) { return sv.water ? 0 : AB.logP(sv, sol.abr); }
+    // 幅（外れの 68%）。学習し直した重みで、その種類の検証の行が 0 件の時（自社のデータが有機溶媒だけ、など）は、
+    // 検証できた幅のうちいちばん広い物（どれも無ければ 1.0 = 10 倍）を使い、bandFallback の印を付ける
+    function p68(o) { return o && isNum(o.p68) ? o.p68 : null; }
+    var FALLBACK_BAND = (function () {
+      var v = [];
+      ['tm', 'notm'].forEach(function (k) { var c = G.cv && G.cv[k]; if (c) ['organic', 'water', 'one_point_organic'].forEach(function (s) { var x = p68(c[s]); if (x !== null) v.push(x); }); });
+      return v.length ? Math.max.apply(null, v) : 1.0;
+    })();
+    function bandOf(cv, kind) { var x = p68(cv && cv[kind]); return x !== null ? { b: x, fb: false } : { b: FALLBACK_BAND, fb: true }; }
 
     // 学習済みモデルの値（log10 mol/L）と、式の内訳
     function model(sol, sv) {
@@ -81,9 +90,11 @@
       if (ref) {
         if (ref.sv.id === sv.id) return { logS: ref.logS, band: 0, ref: true, same: true, has: m.has };
         var delta = m.y - model(sol, ref.sv).y, raw = ref.logS + delta;      // 実測 1 点に、モデルが見込む溶媒どうしの差を足す
-        return { logS: Math.min(raw, cap), band: (ref.sv.water || sv.water) ? cv.water.p68 : cv.one_point_organic.p68, ref: true, capped: raw > cap, delta: delta, has: m.has };
+        var bo = bandOf(cv, (ref.sv.water || sv.water) ? 'water' : 'one_point_organic');
+        return { logS: Math.min(raw, cap), band: bo.b, bandFallback: bo.fb, ref: true, capped: raw > cap, delta: delta, has: m.has };
       }
-      return { logS: Math.min(m.y, cap), band: sv.water ? cv.water.p68 : cv.organic.p68, parts: m.parts, capped: m.y > cap, has: m.has };
+      var bm = bandOf(cv, sv.water ? 'water' : 'organic');
+      return { logS: Math.min(m.y, cap), band: bm.b, bandFallback: bm.fb, parts: m.parts, capped: m.y > cap, has: m.has };
     }
     function refOf(sol, r) {
       if (!r) return null;
@@ -104,8 +115,8 @@
       var sv = solvent(svx), s = norm(sol), ref = refOf(s, opt.reference), e = core(s, sv, ref), lmg = log10mg(e.logS, s.M), ms = measOf(sol, sv.id);
       var r = { solvent: sv.id, logS: e.logS, mgPerML: Math.pow(10, lmg), band: e.band, factor: Math.pow(10, e.band), range: range(lmg, e.band),
         model: modelKey(e.has, sv.water), tmUsed: e.has, capped: !!e.capped, parts: e.parts || null, fromReference: !!e.ref, delta: isNum(e.delta) ? e.delta : null,
-        measured: ms, extrapolated: !(sv.n_rows > 0) };
-      if (isNum(opt.target)) {
+        measured: ms, extrapolated: !(sv.n_rows > 0), bandFallback: !!e.bandFallback };
+      if (isNum(opt.target) && opt.target > 0) {   // 目標の濃度は正の数の時だけ判定する（0 や負の数では判定を付けない）
         if (ms) { r.verdict = SC.verdict(log10mg(ms.logS, s.M), Math.log10(opt.target), MEAS_BAND); r.basis = 'measured'; }
         else { r.verdict = verdict(lmg, e.same ? MEAS_BAND : e.band, opt.target); r.basis = e.ref ? 'reference' : 'model'; }
       }
@@ -143,7 +154,15 @@
       var D = o.diluent || { water: 1 };
       if (Array.isArray(D)) D.forEach(function (d) { dil.push({ key: solvent(d.solvent).id, f: +d.f }); });
       else for (var k in D) dil.push({ key: solvent(k).id, f: +D[k] });
-      var d = SC.dilute(sv.id, +o.stockMgPerML, +o.stockUL, dil, Math.max(0, +o.diluentUL || 0));
+      // 入力の確かめ：原液の濃度と量は正の数、薄める液の量と成分の比は 0 以上、薄める液を足すなら成分の比の合計は正
+      var conc = +o.stockMgPerML, take = +o.stockUL, vol = o.diluentUL === undefined || o.diluentUL === null ? 0 : +o.diluentUL;
+      if (!(isNum(conc) && conc > 0)) throw new Error('stockMgPerML（原液の濃度）は正の数: ' + o.stockMgPerML);
+      if (!(isNum(take) && take > 0)) throw new Error('stockUL（原液の量）は正の数: ' + o.stockUL);
+      if (!(isNum(vol) && vol >= 0)) throw new Error('diluentUL（薄める液の量）は 0 以上の数: ' + o.diluentUL);
+      var fsum = 0;
+      dil.forEach(function (x) { if (!(isNum(x.f) && x.f >= 0)) throw new Error('diluent の成分の比は 0 以上の数: ' + x.key + ' = ' + x.f); fsum += x.f; });
+      if (vol > 0 && !(fsum > 0)) throw new Error('diluent の成分の比の合計が 0（薄める液の組成が決まらない）');
+      var d = SC.dilute(sv.id, conc, take, dil, vol);
       if (!d) throw new Error('量が正しくない');
       var items = Object.keys(d.comp).filter(function (k) { return d.comp[k] > 0; }).map(function (k) { var e = best(sol, byId[k], ref, o.useMeasured); return { id: k, f: d.comp[k], logS: log10mg(e.logS, s.M), band: e.band }; });
       var c = SC.mixCorr(d.comp, MIX), mb = (d.comp.water > 0 ? MIX.band.corrected_wo : MIX.band.corrected_oo) * (items.length > 2 ? 2 : 1), eb2 = items.reduce(function (t, i) { return t + i.f * i.band; }, 0);

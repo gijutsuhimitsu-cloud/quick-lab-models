@@ -8,3 +8,4 @@
 *.pyc
 .DS_Store
 Thumbs.db
+**/tests/own/
