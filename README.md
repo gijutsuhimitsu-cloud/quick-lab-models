@@ -2,18 +2,19 @@
 
 逆相 HPLC の保持時間や化合物の溶解度など、実験の前に大まかな見当をつけるための軽量な予測モデル集です。
 
-推論は 1 回あたり 1 ミリ秒未満で完了し、ブラウザ上（クライアントサイド）または Node.js だけで動作します。入力した分子構造や測定条件が外部サーバーへ送信されることはありません。
+推論は軽く（HPLC と溶解度の木のモデルは 1 回 1 ミリ秒未満）、ブラウザ上（クライアントサイド）または Node.js だけで動作します。入力した分子構造や測定条件が外部サーバーへ送信されることはありません。
 
 予測には誤差の幅を併記していますが、あくまで実験前の目安です。最終的な条件決定や精密な解析は専用ソフトや実測で行ってください。コードは MIT、学習済みの重みは CC BY 4.0 としており、社内利用・商用利用・製品への組み込みも可能です。
 
-*English summary: Lightweight prediction models for everyday lab work (reversed-phase HPLC retention, solubility) that run locally in the browser or Node.js (< 1 ms per prediction, no server required). Code is MIT, weights are CC BY 4.0, and all models are trained only on commercially usable, non-share-alike public datasets. Retraining scripts for your own data are included. Documentation is in Japanese.*
+*English summary: Lightweight prediction models for everyday lab work (reversed-phase HPLC retention, solubility) that run locally in the browser or Node.js (no server required; the tree models take under 1 ms per prediction). Code is MIT, weights are CC BY 4.0, and all models are trained only on commercially usable, non-share-alike public datasets. Retraining scripts for your own data are included. Documentation is in Japanese.*
 
 ## 収録モデル
 
 | モデル | 予測対象 | Version | 内容 |
 |---|---|---|---|
 | [models/hplc-retention](models/hplc-retention/) | 逆相 HPLC の保持（保持係数・保持時間）。カラム、有機溶媒、組成／グラジエント、pH、温度を指定可能。実測値 1 点での補正にも対応 | 0.1 | 推論コード・重み・検証テスト・実行例・再学習スクリプト |
-| [models/solubility](models/solubility/) | 固体の溶解度（混合溶媒にも対応） | 0.1 | 推論コード・重み・検証テスト・実行例・再学習スクリプト |
+| [models/solubility](models/solubility/) | 固体の溶解度（混合溶媒にも対応）。122 溶媒の軽い木のモデル | 0.1 | 推論コード・重み・検証テスト・実行例・再学習スクリプト |
+| [models/solubility-ensemble](models/solubility-ensemble/) | 固体の溶解度の精度を上げた版（主な 14 溶媒、混合溶媒、希釈、実測 3 つまでの換算） | 0.2 | 推論コード・重み・検証テスト・実行例（再学習スクリプトは未同梱） |
 
 今後もモデルを追加していく予定です。フォルダ構成や呼び出し方は [docs/MODEL_LAYOUT.md](docs/MODEL_LAYOUT.md) に揃えてあるので、1 つ使えれば他も同じ要領で組み込めます。
 
@@ -24,7 +25,10 @@
 [技術の秘密](https://gijutsu-himitsu.com) 内に、ブラウザから操作できる体験ページを用意しています。計算はすべてブラウザ内で完結し、入力した構造や条件が外部に送られることはありません。
 
 - 逆相 HPLC の保持予測：https://gijutsu-himitsu.com/lab/hplc/measure/
-- 溶解度予測：公開準備中
+- 溶けるか・混ざるか（立体の画面で、成分を選んで混ぜる）：https://gijutsu-himitsu.com/lab/solubility/check/
+- 溶けるか・混ざるか くわしい版（14 溶媒の見込みと幅、混合溶媒、希釈）：https://gijutsu-himitsu.com/lab/solubility/detail/
+
+※ 溶解度の 2 つのページは、このリポジトリの [models/solubility-ensemble](models/solubility-ensemble/) と同じ重みと計算です（2026-11-27 の版。成分を名前で探す表は、このリポジトリには入っていません）。
 
 ※ 体験ページの HPLC の保持予測は、このリポジトリで配布している重みとは別のモデルです。体験ページでは、継承条件付き（CC BY-SA）の公開データも学習に含めた版（GNN を含む）を使っているため、予測値はこのリポジトリの重みと少し異なります。体験ページのモデルは、このリポジトリには含まれていません。
 
@@ -36,7 +40,7 @@
 
 ## 手元のデータで再学習する
 
-各モデルの `train/` ディレクトリに、手元の実測データを加えて再学習するためのスクリプトと手順書を置いています。
+HPLC の保持と溶解度の木のモデルは、`train/` ディレクトリに、手元の実測データを加えて再学習するためのスクリプトと手順書を置いています（`solubility-ensemble` の再学習スクリプトは未同梱です）。
 
 1. 自分のデータを所定形式の CSV にまとめ、`train/own_data/` に配置します（フォーマットは各モデルの `train/OWN_DATA.md` を参照）。
 2. 手順どおりに学習を実行すると、公開データと手元のデータを合わせた重みファイルが生成されます。

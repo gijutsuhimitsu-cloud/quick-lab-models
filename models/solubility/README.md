@@ -1,5 +1,9 @@
 # 溶けるか・混ざるか（溶解度の見込み）
 
+> 主な 14 溶媒で足りる時は、当たりやすい版 [../solubility-ensemble](../solubility-ensemble/)（0.2）もあります。こちら（0.1）は 122 溶媒に対応し、手元のデータで学び直す道具（`train/`）が付いています。
+>
+> *A more accurate version for 14 common solvents is in [../solubility-ensemble](../solubility-ensemble/); this folder covers 122 solvents and includes the retraining kit.*
+
 *English summary: a tiny solubility model that runs in the browser or Node with no build step. Given a solid (SMILES, or one of 37 example compounds) it estimates the solubility at 25 °C in 122 solvents (16 common ones are highlighted), with an uncertainty band (the range that contains about 70 % of errors on held-out compounds). It also handles binary solvent mixtures (log-linear mixing plus a fitted pair correction) and checks whether a stock solution will precipitate when diluted before HPLC injection. One measured value (or a melting point) narrows the band; melting points of about 19,000 structures are looked up automatically (open CC0 dataset). Typical accuracy on held-out compounds: organic solvents within ~3.3× (with melting point) / ~5.4× (without) for 70 % of cases; water ~3.8× / ~4.9×; mixed solvents ~1.9×. Code MIT, weights CC BY 4.0, trained only on commercially usable public data (BigSolDB 2.2, MixtureSolDB, AqSolDB, Abraham tables, an open melting-point dataset). Retraining kit with your own data included (train/). Docs in Japanese.*
 
 この固体は、この溶媒に、目標の濃度まで溶けるか。混合溶媒ならどうか。DMSO の原液を水で薄めたら析出しないか。——その「だいたい」を、実験の前にすぐ見るためのモデルです。
